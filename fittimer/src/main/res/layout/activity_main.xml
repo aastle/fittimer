@@ -1,0 +1,69 @@
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    tools:context=".MainActivity" >
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true">
+
+
+        <com.aastle.fittimer.StopWatch
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="00"
+            android:textColor="#ff510c"
+            app:extraInformation="My extra information"
+            android:gravity="center_horizontal"
+            android:textStyle="bold"
+            android:id="@+id/stopwatch"
+            android:textSize="80sp" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/spacerAboveStart"
+            android:layout_gravity="center_horizontal"
+            android:padding="20dp" />
+
+        <Button
+            android:layout_width="160dp"
+            android:layout_height="160dp"
+            android:text="START"
+            android:id="@+id/buttonStartStop"
+            android:textColor="#fef9ff"
+            android:textStyle="bold"
+            android:background="@drawable/shape_circle_stop_start"
+            android:layout_gravity="center_horizontal"
+            android:textSize="46sp" />
+
+        <TextView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceLarge"
+            android:id="@+id/spacerBelowStart"
+            android:layout_gravity="center_horizontal" />
+
+        <Button
+            style="?android:attr/buttonStyleSmall"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:text="@string/RESET"
+            android:id="@+id/buttonReset"
+            android:layout_gravity="right"
+            android:background="@drawable/shape_reset_circle"
+            android:textColor="#fffc04"
+            android:textStyle="bold"
+            android:padding="10dp"
+            android:textSize="16sp"
+            android:layout_marginRight="20dp" />
+    </LinearLayout>
+</RelativeLayout>

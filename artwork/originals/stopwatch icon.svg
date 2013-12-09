@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg-source"
+   height="450"
+   version="1.1"
+   inkscape:version="0.48.4 r9939"
+   width="450"
+   sodipodi:docname="stopwatch icon.svg"
+   inkscape:export-filename="C:\Users\prometheus\AndroidStudioProjects\FitTimer\fittimer\src\main\res\drawable-xxhdpi\ic_launcher.png"
+   inkscape:export-xdpi="28.799999"
+   inkscape:export-ydpi="28.799999">
+  <metadata
+     id="metadata10">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs8">
+    <linearGradient
+       id="linearGradient5205">
+      <stop
+         style="stop-color:#ea542b;stop-opacity:1;"
+         offset="0"
+         id="stop5207" />
+      <stop
+         id="stop5217"
+         offset="0.91666669"
+         style="stop-color:#ea542b;stop-opacity:0.74901961;" />
+      <stop
+         id="stop5215"
+         offset="1"
+         style="stop-color:#ea542b;stop-opacity:0.49803922;" />
+      <stop
+         style="stop-color:#ea542b;stop-opacity:0;"
+         offset="1"
+         id="stop5209" />
+    </linearGradient>
+  </defs>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="943"
+     inkscape:window-height="694"
+     id="namedview6"
+     showgrid="false"
+     inkscape:zoom="0.94236332"
+     inkscape:cx="114.38402"
+     inkscape:cy="186.12788"
+     inkscape:window-x="403"
+     inkscape:window-y="1"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="svg-source"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <g
+     id="stopwatch"
+     data-iconmelon="Batch:ae356a7133df505781ac32e4314fc525"
+     transform="matrix(14.055045,0,0,13.689846,-4.463299,6.213703)"
+     style="fill:#ff6236;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26673889000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none">
+    <path
+       id="path4"
+       d="M 28,20 C 28,26.626 22.626,32 16,32 9.374,32 4,26.626 4,20 4,13.374 9.374,8 16,8 22.626,8 28,13.374 28,20 z M 16,12 c -4.418,0 -8,3.582 -8,8 0,4.418 3.582,8 8,8 4.418,0 8,-3.582 8,-8 0,-4.418 -3.582,-8 -8,-8 z m 0,10 c -1.104,0 -2,-0.894 -2,-2 0,-1.106 2,-6 2,-6 0,0 2,4.894 2,6 0,1.106 -0.894,2 -2,2 z M 12,4 c 0,-2.208 1.792,-4 4,-4 2.208,0 4,1.792 4,4 0,2.208 -1.792,4 -4,4 -2.208,0 -4,-1.792 -4,-4 z m 4,2 c 1.106,0 2,-0.894 2,-2 0,-1.106 -0.894,-2 -2,-2 -1.104,0 -2,0.894 -2,2 0,1.106 0.896,2 2,2 z"
+       inkscape:connector-curvature="0"
+       style="fill:#ff6236;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:0.26673889000000001;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none" />
+  </g>
+</svg>
