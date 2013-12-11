@@ -28,8 +28,10 @@ public class MainActivity extends Activity {
     StopWatch stopWatch;
     Button buttonStopWatch;
     Button resetButton;
+    Button statsButton;
     Drawable shapePaused;
     Drawable shapeStart;
+    Drawable shapeStats;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
@@ -41,6 +43,7 @@ public class MainActivity extends Activity {
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
+        shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
 
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
@@ -69,8 +72,6 @@ public class MainActivity extends Activity {
         resetButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-
-
                 if(stopWatch.running()){
                     stopWatch.resetClock();
                     buttonStopWatch.setText("PAUSE");
@@ -87,10 +88,16 @@ public class MainActivity extends Activity {
 
             }
         });
-
+        statsButton = (Button)findViewById(R.id.buttonStats);
+        statsButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showDialogBox(getTimeFromSqlite());
+            }
+        });
     }
     private String getDate(){
-        DateFormat dateFormat = new SimpleDateFormat("MM/DD/yyyy");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date date = new Date();
         return dateFormat.format(date);
     }
@@ -117,7 +124,7 @@ public class MainActivity extends Activity {
                 startActivity(new Intent(this,SettingsActivity.class));
                 return true;
             case R.id.about:
-                showAboutDialog(buildAboutInfo());
+                showDialogBox(buildAboutInfo());
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -133,9 +140,10 @@ public class MainActivity extends Activity {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time FROM ");
         sqlBuilder.append(TABLE_NAME);
+        sqlBuilder.append(" WHERE date >= date()");
         StringBuilder stringBuilder = new StringBuilder();
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
-        Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
+        //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
         cursor.moveToFirst();
@@ -181,7 +189,7 @@ public class MainActivity extends Activity {
         return stringBuilder.toString();
 
     }
-    private void showAboutDialog(CharSequence about){
+    private void showDialogBox(CharSequence about){
         new AlertDialog.Builder(this)
                 .setMessage(about)
                 .setPositiveButton("OK",null)
