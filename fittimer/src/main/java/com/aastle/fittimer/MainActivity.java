@@ -93,7 +93,7 @@ public class MainActivity extends Activity {
         statsButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                showDialogBox(getTimeFromSqlite());
+                showDialogBox(getStats());
             }
         });
     }
@@ -137,30 +137,44 @@ public class MainActivity extends Activity {
         return id;
     }
 
-    private String getTimeFromSqlite(){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat simpleHumanDateFormat = new SimpleDateFormat("MMMM d yyyy");
+    private String getStats(){
+        Cursor statsCursor = getTimeFromSqlite();
+        return buildStats(statsCursor);
+    }
+
+    private Cursor getTimeFromSqlite(){
+
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time FROM ");
         sqlBuilder.append(TABLE_NAME);
         sqlBuilder.append(" WHERE date >= date()");
-        StringBuilder stringBuilder = new StringBuilder();
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
+        return cursor;
+    }
+    private String buildStats(Cursor cursor){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat simpleHumanDateFormat = new SimpleDateFormat("MMMM d',' yyyy");
+        SimpleDateFormat simpleTimeFormatInput = new SimpleDateFormat("HH:mm:ss");
+        SimpleDateFormat simpleHumanTimeFormat = new SimpleDateFormat("H:mm:ss");
+        StringBuilder stringBuilder = new StringBuilder();
+
         cursor.moveToFirst();
         while (cursor.isAfterLast() == false)
         {
             Date date = null;
+            Date time = null;
             try{
-             date = simpleDateFormat.parse(cursor.getString(cursor.getColumnIndex("date")));
+                date = simpleDateFormat.parse(cursor.getString(cursor.getColumnIndex("date")));
+                time = simpleTimeFormatInput.parse(cursor.getString(cursor.getColumnIndex("time")));
             }catch (ParseException pe){
                 Log.e(TAG,pe.getMessage());
             }
             stringBuilder.append(simpleHumanDateFormat.format(date));
             stringBuilder.append(" \n");
-            stringBuilder.append(cursor.getString(cursor.getColumnIndex("time")));
+            stringBuilder.append(simpleHumanTimeFormat.format(time));
             stringBuilder.append(" \n");
             stringBuilder.append(cursor.getString(cursor.getColumnIndex("appstate")));
             stringBuilder.append(" \n");
