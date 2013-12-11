@@ -38,18 +38,47 @@
             android:layout_gravity="center_horizontal"
             android:textSize="60sp" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="90dp"
-            android:layout_height="90dp"
-            android:text="@string/RESET"
-            android:id="@+id/buttonReset"
-            android:layout_gravity="right"
-            android:background="@drawable/shape_reset_circle"
-            android:textColor="#fffc04"
-            android:textStyle="bold"
-            android:padding="10dp"
-            android:textSize="22sp"
-            android:layout_marginRight="20dp" />
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top"
+            android:gravity="top">
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="TIMES"
+                android:id="@+id/buttonStats"
+                android:textStyle="bold"
+                android:layout_gravity="left|top" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:textAppearance="?android:attr/textAppearanceLarge"
+                android:text="Large Text"
+                android:id="@+id/textView"
+                android:layout_gravity="center_vertical"
+                android:paddingRight="50dp"
+                android:paddingLeft="50dp" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="90dp"
+                android:layout_height="90dp"
+                android:text="@string/RESET"
+                android:id="@+id/buttonReset"
+                android:layout_gravity="right|top"
+                android:background="@drawable/shape_reset_circle"
+                android:textColor="#fffc04"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:textSize="22sp"
+                android:layout_marginRight="20dp" />
+
+        </LinearLayout>
+
     </LinearLayout>
 </RelativeLayout>

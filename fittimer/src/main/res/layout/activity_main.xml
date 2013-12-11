@@ -52,18 +52,38 @@
             android:id="@+id/spacerBelowStart"
             android:layout_gravity="center_horizontal" />
 
-        <Button
-            style="?android:attr/buttonStyleSmall"
-            android:layout_width="70dp"
-            android:layout_height="70dp"
-            android:text="@string/RESET"
-            android:id="@+id/buttonReset"
-            android:layout_gravity="right"
-            android:background="@drawable/shape_reset_circle"
-            android:textColor="#fffc04"
-            android:textStyle="bold"
-            android:padding="10dp"
-            android:textSize="16sp"
-            android:layout_marginRight="20dp" />
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
+                android:text="@string/RESET"
+                android:id="@+id/buttonReset"
+                android:layout_gravity="right"
+                android:background="@drawable/shape_reset_circle"
+                android:textColor="#fffc04"
+                android:textStyle="bold"
+                android:padding="10dp"
+                android:textSize="16sp"
+                android:layout_marginRight="20dp"
+                android:layout_alignParentStart="false"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true" />
+
+            <Button
+                style="?android:attr/buttonStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/times"
+                android:id="@+id/buttonStats"
+                android:layout_centerVertical="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp" />
+        </RelativeLayout>
+
     </LinearLayout>
 </RelativeLayout>
