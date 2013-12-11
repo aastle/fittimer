@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
+import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -137,6 +138,8 @@ public class MainActivity extends Activity {
     }
 
     private String getTimeFromSqlite(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat simpleHumanDateFormat = new SimpleDateFormat("MMMM d yyyy");
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time FROM ");
         sqlBuilder.append(TABLE_NAME);
@@ -149,11 +152,18 @@ public class MainActivity extends Activity {
         cursor.moveToFirst();
         while (cursor.isAfterLast() == false)
         {
-            stringBuilder.append(cursor.getString(cursor.getColumnIndex("date")));
-            stringBuilder.append("\n");
+            Date date = null;
+            try{
+             date = simpleDateFormat.parse(cursor.getString(cursor.getColumnIndex("date")));
+            }catch (ParseException pe){
+                Log.e(TAG,pe.getMessage());
+            }
+            stringBuilder.append(simpleHumanDateFormat.format(date));
+            stringBuilder.append(" \n");
             stringBuilder.append(cursor.getString(cursor.getColumnIndex("time")));
-            stringBuilder.append("\n");
-            stringBuilder.append(cursor.getString(cursor.getColumnIndex("appstate"))); 
+            stringBuilder.append(" \n");
+            stringBuilder.append(cursor.getString(cursor.getColumnIndex("appstate")));
+            stringBuilder.append(" \n");
             cursor.moveToNext();
         }
         //Log.d("SQL",sqlBuilder.toString());
