@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -30,6 +31,8 @@ public class MainActivity extends Activity {
     Drawable shapePaused;
     Drawable shapeStart;
     Drawable shapeStats;
+    TransitionDrawable pulse_start;
+
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
@@ -42,6 +45,7 @@ public class MainActivity extends Activity {
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
+        pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
 
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
@@ -62,7 +66,7 @@ public class MainActivity extends Activity {
                     // TODO record time elapsed and date to sqlite db
                     long id = saveTime(TABLE_NAME,getDate(),getTime(),"paused");
                     //Log.e(TAG,"stopWatch.running, INSERT id: "+id);
-
+                    pulseColor(stopWatch.running());
                 }
             }
         });
@@ -93,6 +97,11 @@ public class MainActivity extends Activity {
                 showDialogBox(getStats());
             }
         });
+    }
+    private void pulseColor(boolean running){
+        while(running){
+            pulse_start.startTransition(60);
+        }
     }
     private String getDate(){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
