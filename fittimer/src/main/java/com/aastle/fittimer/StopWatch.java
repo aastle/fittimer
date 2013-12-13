@@ -51,12 +51,14 @@ public class StopWatch extends Chronometer {
                 R.styleable.StopWatch);
 
         //Use a
+/*
         Log.i("test", a.getString(
                 R.styleable.StopWatch_android_text));
         Log.i("test",""+a.getColor(
                 R.styleable.StopWatch_android_textColor, Color.BLACK));
         Log.i("test",a.getString(
                 R.styleable.StopWatch_extraInformation));
+*/
 
         //Don't forget this
         a.recycle();

@@ -1,9 +1,13 @@
 package com.aastle.fittimer;
 
+import android.animation.ArgbEvaluator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
@@ -13,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.Chronometer;
+import android.widget.LinearLayout;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -33,6 +39,9 @@ public class MainActivity extends Activity {
     Drawable shapeStats;
     TransitionDrawable pulse_start;
 
+    int start;
+    int end;
+    LinearLayout linearLayout;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
@@ -45,7 +54,9 @@ public class MainActivity extends Activity {
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
+        linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
         pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
+
 
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
@@ -66,7 +77,6 @@ public class MainActivity extends Activity {
                     // TODO record time elapsed and date to sqlite db
                     long id = saveTime(TABLE_NAME,getDate(),getTime(),"paused");
                     //Log.e(TAG,"stopWatch.running, INSERT id: "+id);
-                    pulseColor(stopWatch.running());
                 }
             }
         });
@@ -90,6 +100,13 @@ public class MainActivity extends Activity {
 
             }
         });
+
+        stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
+            @Override
+            public void onChronometerTick(Chronometer chronometer) {
+                colorThrobber();
+            }
+        });
         statsButton = (Button)findViewById(R.id.buttonStats);
         statsButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -98,10 +115,17 @@ public class MainActivity extends Activity {
             }
         });
     }
-    private void pulseColor(boolean running){
-        while(running){
-            pulse_start.startTransition(60);
-        }
+    private void colorThrobber(){
+        ValueAnimator va;
+        va = ObjectAnimator.ofInt(findViewById(R.id.linearLayout), "backgroundColor", start, end);
+        start = Color.WHITE;
+        end = Color.LTGRAY;
+        va.setDuration(500);
+        va.setEvaluator(new ArgbEvaluator());
+        va.setRepeatCount(ValueAnimator.INFINITE);
+        va.setRepeatMode(ValueAnimator.REVERSE);
+        va.start();
+
     }
     private String getDate(){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
