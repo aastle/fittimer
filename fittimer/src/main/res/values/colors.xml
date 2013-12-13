@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <color name="darkgray">#404040ff</color>
-    <color name="black">#000ff</color>
+    <color name="darkgray">#505050</color>
+    <color name="black">#000000</color>
     <color name="red">#ff00ff</color>
-    <color name="green">#0ff0ff</color>
+    <color name="green">#00FF00</color>
     <color name="lightgray">#c0c0c0ff</color>
     <color name="white">#ffffffff</color>
-    <color name="yellow">#ffff0ff</color>
-    <color name="blue">#00ffff</color>
-    <color name="gray">#808080ff</color>
-    <color name="magenta">#ff0ffff</color>
-    <color name="cyan">#0ffffff</color>
+    <color name="yellow">#ffff44</color>
+    <color name="blue">#0000CC</color>
+    <color name="gray">#A8A8A8</color>
+    <color name="magenta">#d218cd</color>
+    <color name="cyan">#00FFFF</color>
 </resources>
