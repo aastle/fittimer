@@ -6,11 +6,15 @@ import android.animation.ValueAnimator;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
+import android.preference.Preference;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +42,9 @@ public class MainActivity extends Activity {
     Drawable shapeStart;
     Drawable shapeStats;
     TransitionDrawable pulse_start;
+    SharedPreferences.OnSharedPreferenceChangeListener listener;
+
+    boolean throb = true;
 
     int start;
     int end;
@@ -45,11 +52,13 @@ public class MainActivity extends Activity {
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
+    private SharedPreferences prefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        throb = checkThrobberPref();
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
@@ -57,25 +66,26 @@ public class MainActivity extends Activity {
         linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
         pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
 
-
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!stopWatch.running()) {
+                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"running");
                     stopWatch.startClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
-                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"running");
+
                     //Log.e(TAG,"!stopWatch.running, INSERT id = "+ id);
                 } else if (stopWatch.running()) {
+                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"paused");
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
                     buttonStopWatch.setBackground(shapePaused);
                     // TODO record time elapsed and date to sqlite db
-                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"paused");
+
                     //Log.e(TAG,"stopWatch.running, INSERT id: "+id);
                 }
             }
@@ -97,14 +107,16 @@ public class MainActivity extends Activity {
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
                 }
-
             }
         });
 
         stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
+                Log.e(TAG,"*******onChronometerTick throb = " + throb);
+                if(throb){
                 colorThrobber();
+                }
             }
         });
         statsButton = (Button)findViewById(R.id.buttonStats);
@@ -114,6 +126,16 @@ public class MainActivity extends Activity {
                 showDialogBox(getStats());
             }
         });
+        final SharedPreferences preferences = getSharedPreferences("preferences",MODE_PRIVATE);
+        preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+                if(key.equals("preference_throb")){
+                    throb  = preferences.getBoolean(key,true);
+                }
+            }
+        });
+
     }
     private void colorThrobber(){
         ValueAnimator va;
@@ -122,10 +144,9 @@ public class MainActivity extends Activity {
         end = Color.LTGRAY;
         va.setDuration(500);
         va.setEvaluator(new ArgbEvaluator());
-        va.setRepeatCount(ValueAnimator.INFINITE);
+        va.setRepeatCount(1);
         va.setRepeatMode(ValueAnimator.REVERSE);
         va.start();
-
     }
     private String getDate(){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -242,6 +263,13 @@ public class MainActivity extends Activity {
         stringBuilder.append(" by Alan W. Astle");
         return stringBuilder.toString();
 
+    }
+    private boolean checkThrobberPref(){
+        SharedPreferences myPref = PreferenceManager.getDefaultSharedPreferences(
+                getBaseContext());
+        boolean _pref = myPref.getBoolean("preference_throb", true);
+        Log.e(TAG,"_pref: " + _pref);
+        return _pref;
     }
     private void showDialogBox(CharSequence about){
         new AlertDialog.Builder(this)

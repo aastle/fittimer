@@ -52,17 +52,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if(databaseExists)
         {
             openDatabase();
-            Log.e("SQL","DatabaseHelp constructor, database exists, Database opened");
+            //Log.e("SQL","DatabaseHelp constructor, database exists, Database opened");
         }
         else
         {
-            Log.e("SQL","DatabaseHelper constructor: Database doesn't exist");
+            //Log.e("SQL","DatabaseHelper constructor: Database doesn't exist");
             try{
             createDatabase();
-            Log.e("SQL","DataBaseHelper constructor, Database Created");
+            //Log.e("SQL","DataBaseHelper constructor, Database Created");
             openDatabase();
             } catch (Exception e){
-                Log.e("SQL",">>>>>>>>> Create database failed: " + e.fillInStackTrace());
+                //Log.e("SQL",">>>>>>>>> Create database failed: " + e.fillInStackTrace());
             }
         }
     }
@@ -143,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public long insertTime(String tableName, String date, String time, String appState) {
         long id;
         thisDataBase = getWritableDatabase();
-        Log.e("SQL","insertTime(), thisDataBase.toString() = "+thisDataBase.toString() + ", tableName = " + tableName);
+        //Log.e("SQL","insertTime(), thisDataBase.toString() = "+thisDataBase.toString() + ", tableName = " + tableName);
         ContentValues initialValues = new ContentValues();
         initialValues.put(COL_DATE, date);
         initialValues.put(COL_TIME, time);
@@ -167,8 +167,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Long getCountOfTableRows(String tableName){
         thisDataBase = getReadableDatabase();
-        Log.e("SQL","getCountOfTableRows(), thisDataBase.toString() = " + thisDataBase.toString() +", tableName = " + tableName);
-        Log.e("SQL","thisDataBase.isOpen() = " + thisDataBase.isOpen());
+//        Log.e("SQL","getCountOfTableRows(), thisDataBase.toString() = " + thisDataBase.toString() +", tableName = " + tableName);
+//        Log.e("SQL","thisDataBase.isOpen() = " + thisDataBase.isOpen());
         Long results = null;
         try{
         SQLiteStatement sqLiteStatement = thisDataBase.compileStatement("SELECT COUNT(*) FROM " + tableName);

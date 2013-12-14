@@ -1,19 +1,25 @@
 package com.aastle.fittimer;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import static android.content.Intent.*;
 import static android.provider.MediaStore.*;
 import static android.provider.MediaStore.Images.*;
 
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends PreferenceActivity  {
     public static String PHOTO_WIDTH = "";
     public static String PHOTO_HEIGHT = "";
+    public static String TAG = "SQL";
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,6 +36,8 @@ public class SettingsActivity extends PreferenceActivity {
                 }
             });
         }
+
+
 
     }
 
