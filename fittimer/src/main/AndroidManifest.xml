@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.aastle.fittimer"
     android:versionCode="6"
-    android:versionName="1.5.1" >
+    android:versionName="1.5.2" >
 
     <uses-sdk
         android:minSdkVersion="15"
@@ -26,6 +26,7 @@
             android:name="com.aastle.fittimer.SettingsActivity"
             android:label="@string/title_activity_settings" >
         </activity>
+        <uses-permission android:name="android.permission.INTERNET" />
     </application>
 
 </manifest>

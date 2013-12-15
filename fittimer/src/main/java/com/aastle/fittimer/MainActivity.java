@@ -28,6 +28,8 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+import com.bugsense.trace.BugSenseHandler;
+
 
 public class MainActivity extends Activity {
     StopWatch stopWatch;
@@ -49,10 +51,12 @@ public class MainActivity extends Activity {
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
     private SharedPreferences prefs;
+    private static final String APIKEY = "cbf9dc71";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        BugSenseHandler.initAndStartSession(this, APIKEY);
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
