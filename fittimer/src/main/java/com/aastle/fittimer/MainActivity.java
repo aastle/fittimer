@@ -12,8 +12,6 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.Preference;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
@@ -29,8 +27,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
-import org.joda.time.DateTime;
 
 
 public class MainActivity extends Activity {
@@ -113,7 +109,7 @@ public class MainActivity extends Activity {
         stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
-                Log.e(TAG,"*******onChronometerTick throb = " + throb);
+
                 if(throb){
                 colorThrobber();
                 }
@@ -126,16 +122,6 @@ public class MainActivity extends Activity {
                 showDialogBox(getStats());
             }
         });
-        final SharedPreferences preferences = getSharedPreferences("preferences",MODE_PRIVATE);
-        preferences.registerOnSharedPreferenceChangeListener(new SharedPreferences.OnSharedPreferenceChangeListener() {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                if(key.equals("preference_throb")){
-                    throb  = preferences.getBoolean(key,true);
-                }
-            }
-        });
-
     }
     private void colorThrobber(){
         ValueAnimator va;
@@ -268,7 +254,7 @@ public class MainActivity extends Activity {
         SharedPreferences myPref = PreferenceManager.getDefaultSharedPreferences(
                 getBaseContext());
         boolean _pref = myPref.getBoolean("preference_throb", true);
-        Log.e(TAG,"_pref: " + _pref);
+        //Log.e(TAG,"_pref: " + _pref);
         return _pref;
     }
     private void showDialogBox(CharSequence about){
