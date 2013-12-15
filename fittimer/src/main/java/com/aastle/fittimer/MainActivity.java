@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BugSenseHandler.initAndStartSession(this, APIKEY);
+        BugSenseHandler.initAndStartSession(getBaseContext(), APIKEY);
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
