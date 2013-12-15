@@ -40,18 +40,13 @@ public class MainActivity extends Activity {
     Drawable shapeStart;
     Drawable shapeStats;
     TransitionDrawable pulse_start;
-
-
     boolean throb = true;
-
     int start;
     int end;
     LinearLayout linearLayout;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
     private static final String TABLE_NAME = "times";
-    private SharedPreferences prefs;
-    private static final String APIKEY = "cbf9dc71";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,7 +66,7 @@ public class MainActivity extends Activity {
             @Override
             public void onClick(View v) {
                 if (!stopWatch.running()) {
-                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"running");
+                    saveTime(TABLE_NAME,getDate(),getTime(),"running");
                     stopWatch.startClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
@@ -79,7 +74,7 @@ public class MainActivity extends Activity {
 
                     //Log.e(TAG,"!stopWatch.running, INSERT id = "+ id);
                 } else if (stopWatch.running()) {
-                    long id = saveTime(TABLE_NAME,getDate(),getTime(),"paused");
+                    saveTime(TABLE_NAME,getDate(),getTime(),"paused");
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
@@ -174,8 +169,7 @@ public class MainActivity extends Activity {
 
     private long saveTime(String table, String date, String time, String appState){
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
-        long id = dbHelper.insertTime(table,date,time,appState);
-        return id;
+        return dbHelper.insertTime(table,date,time,appState);
     }
 
     private String getStats(){
@@ -192,8 +186,7 @@ public class MainActivity extends Activity {
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
-        Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
-        return cursor;
+        return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
     }
     private String buildStats(Cursor cursor){
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
@@ -203,7 +196,7 @@ public class MainActivity extends Activity {
         StringBuilder stringBuilder = new StringBuilder();
 
         cursor.moveToFirst();
-        while (cursor.isAfterLast() == false)
+        while (!cursor.isAfterLast())
         {
             Date date = null;
             Date time = null;
@@ -212,6 +205,8 @@ public class MainActivity extends Activity {
                 time = simpleTimeFormatInput.parse(cursor.getString(cursor.getColumnIndex("time")));
             }catch (ParseException pe){
                 Log.e(TAG,pe.getMessage());
+            }catch (Exception e){
+                Log.e(TAG,e.getMessage());
             }
             stringBuilder.append(simpleHumanDateFormat.format(date));
             stringBuilder.append(" \n");
@@ -257,9 +252,7 @@ public class MainActivity extends Activity {
     private boolean checkThrobberPref(){
         SharedPreferences myPref = PreferenceManager.getDefaultSharedPreferences(
                 getBaseContext());
-        boolean _pref = myPref.getBoolean("preference_throb", true);
-        //Log.e(TAG,"_pref: " + _pref);
-        return _pref;
+        return myPref.getBoolean("preference_throb", true);
     }
     private void showDialogBox(CharSequence about){
         new AlertDialog.Builder(this)
