@@ -28,7 +28,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.bugsense.trace.BugSenseHandler;
+
 
 
 public class MainActivity extends Activity {
@@ -40,7 +40,7 @@ public class MainActivity extends Activity {
     Drawable shapeStart;
     Drawable shapeStats;
     TransitionDrawable pulse_start;
-    SharedPreferences.OnSharedPreferenceChangeListener listener;
+
 
     boolean throb = true;
 
@@ -56,7 +56,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        BugSenseHandler.initAndStartSession(getBaseContext(), APIKEY);
+
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
