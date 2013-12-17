@@ -266,7 +266,24 @@ public class MainActivity extends Activity {
         DateTimeFormatter simpleHumanTimeFormat = DateTimeFormat.forPattern("H:mm:ss");
 
         cursor.moveToFirst();
+        DateTime firstDate = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
+        cursor.moveToLast();
+        DateTime lastDate = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
+        DateTime dateDiff = lastDate.minusHours(firstDate.get(DateTimeFieldType.hourOfDay()))
+                .minusMinutes(firstDate.get(DateTimeFieldType.minuteOfHour()))
+                .minusSeconds(firstDate.get(DateTimeFieldType.secondOfMinute()));
+        stringBuilder.append("Date: ");
+        stringBuilder.append(dateDiff.toString(simpleHumanDateFormat));
+        stringBuilder.append("\n\n");
+        stringBuilder.append("Total time exercised:\n");
+        stringBuilder.append(dateDiff.toString(simpleHumanTimeFormat));
+        stringBuilder.append("\n");
+        stringBuilder
+                .append(dateDiff.toString(DateTimeFormat.forPattern("H"))).append(" hours, ")
+                        .append(dateDiff.toString(DateTimeFormat.forPattern("m"))).append(" minutes, ")
+                        .append(dateDiff.toString(DateTimeFormat.forPattern("s"))).append(" seconds");
 
+/*
         while (!cursor.isAfterLast())
         {
             try{
@@ -306,6 +323,7 @@ public class MainActivity extends Activity {
             stringBuilder.append(dt.toString(simpleHumanTimeFormat));
             stringBuilder.append("\n");
         }
+*/
 
         return stringBuilder.toString();
     }
