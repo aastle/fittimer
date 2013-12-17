@@ -22,9 +22,14 @@ import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.LinearLayout;
 
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -174,7 +179,7 @@ public class MainActivity extends Activity {
 
     private String getStats(){
         Cursor statsCursor = getTimeFromSqlite();
-        return buildStats(statsCursor);
+        return buildJodaStats(statsCursor);
     }
 
     private Cursor getTimeFromSqlite(){
@@ -182,41 +187,49 @@ public class MainActivity extends Activity {
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time FROM ");
         sqlBuilder.append(TABLE_NAME);
-        sqlBuilder.append(" WHERE date >= date()");
+        sqlBuilder.append(" WHERE date >= date() ");
+        sqlBuilder.append(" ORDER BY time");
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
     }
-    private String buildStats(Cursor cursor){
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        SimpleDateFormat simpleHumanDateFormat = new SimpleDateFormat("MMMM d',' yyyy");
-        SimpleDateFormat simpleTimeFormatInput = new SimpleDateFormat("HH:mm:ss");
-        SimpleDateFormat simpleHumanTimeFormat = new SimpleDateFormat("H:mm:ss");
+
+    /**
+     * Builds and displays exercise stats using the Jodatime library
+     * @param cursor
+     * @return string
+     */
+    private String buildJodaStats(Cursor cursor){
+        ArrayList<DateTime> arrayList = new ArrayList<DateTime>();
         StringBuilder stringBuilder = new StringBuilder();
+        DateTime datePart = new DateTime();
+        DateTime timePart = new DateTime();
+        DateTimeFormatter formatterDateSqlite = DateTimeFormat.forPattern("yyyy-MM-dd");
+        DateTimeFormatter formatterTimeSqlite = DateTimeFormat.forPattern("HH:mm:ss");
+        DateTimeFormatter simpleHumanDateFormat = DateTimeFormat.forPattern("MMMM d',' yyyy");
+        DateTimeFormatter simpleHumanTimeFormat = DateTimeFormat.forPattern("H:mm:ss");
 
         cursor.moveToFirst();
+
         while (!cursor.isAfterLast())
         {
-            Date date = null;
-            Date time = null;
             try{
-                date = simpleDateFormat.parse(cursor.getString(cursor.getColumnIndex("date")));
-                time = simpleTimeFormatInput.parse(cursor.getString(cursor.getColumnIndex("time")));
-            }catch (ParseException pe){
+                datePart = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
+                timePart = formatterTimeSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("time")));
+                arrayList.add(timePart);
+            }catch (Exception pe){
                 Log.e(TAG,pe.getMessage());
-            }catch (Exception e){
-                Log.e(TAG,e.getMessage());
             }
-            stringBuilder.append(simpleHumanDateFormat.format(date));
+            stringBuilder.append(datePart.toString(simpleHumanDateFormat));
             stringBuilder.append(" \n");
-            stringBuilder.append(simpleHumanTimeFormat.format(time));
+            stringBuilder.append(timePart.toString(simpleHumanTimeFormat));
             stringBuilder.append(" \n");
             stringBuilder.append(cursor.getString(cursor.getColumnIndex("appstate")));
             stringBuilder.append(" \n");
             cursor.moveToNext();
         }
-        //Log.d("SQL",sqlBuilder.toString());
+
         return stringBuilder.toString();
     }
 
