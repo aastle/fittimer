@@ -32,6 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_DATE = "date";
     public static final String COL_TIME = "time";
     public static final String COL_APPSTATE = "appstate";
+    public static final String COL_INTERVAL = "interval";
 
 
     /**
@@ -140,7 +141,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param appState
      * @return
      */
-    public long insertTime(String tableName, String date, String time, String appState) {
+    public long insertTime(String tableName, String date, String time, String appState,int interval) {
         long id;
         thisDataBase = getWritableDatabase();
         //Log.e("SQL","insertTime(), thisDataBase.toString() = "+thisDataBase.toString() + ", tableName = " + tableName);
@@ -148,6 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         initialValues.put(COL_DATE, date);
         initialValues.put(COL_TIME, time);
         initialValues.put(COL_APPSTATE,appState);
+        initialValues.put(COL_INTERVAL,interval);
         id = thisDataBase.insert(tableName, null, initialValues);
         thisDataBase.close();
         return id;
@@ -180,7 +182,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         return results;
     }
+    public int DeleteAllRowsFromTable(String table){
 
+        thisDataBase = getWritableDatabase();
+        return thisDataBase.delete(table,null,null);
+    }
     public Cursor showAllTables(){
         String mySql = " SELECT name FROM sqlite_master " + " WHERE type='table'"
                 + "   AND name LIKE 'PR_%' ";

@@ -23,9 +23,11 @@ import android.widget.Chronometer;
 import android.widget.LinearLayout;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeFieldType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import java.lang.reflect.Array;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -48,6 +50,7 @@ public class MainActivity extends Activity {
     boolean throb = true;
     int start;
     int end;
+    private int interval;
     LinearLayout linearLayout;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
@@ -59,35 +62,45 @@ public class MainActivity extends Activity {
 
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
+
+        //TODO Delete the following before release!!!!
+/*
+        DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
+        int rowsDeleted = dbHelper.DeleteAllRowsFromTable(TABLE_NAME);
+        Log.e(TAG,"DELETED n rows, n = " + rowsDeleted);
+*/
+
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
         linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
         pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
-
+        interval=1;
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 if (!stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"running");
+                    saveTime(TABLE_NAME,getDate(),getTime(),"running",interval);
                     stopWatch.startClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
 
-                    //Log.e(TAG,"!stopWatch.running, INSERT id = "+ id);
+                    Log.e(TAG,"!stopWatch.running, interval = "+ interval);
                 } else if (stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"paused");
+                    saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval);
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
                     buttonStopWatch.setBackground(shapePaused);
-                    // TODO record time elapsed and date to sqlite db
+                    Log.e(TAG,"stopWatch.paused, interval "+ interval);
+                    getInterval();
 
-                    //Log.e(TAG,"stopWatch.running, INSERT id: "+id);
                 }
+
             }
         });
         resetButton = (Button) findViewById(R.id.buttonReset);
@@ -127,6 +140,9 @@ public class MainActivity extends Activity {
             }
         });
     }
+    private int getInterval(){
+        return interval++;
+    }
     private void colorThrobber(){
         ValueAnimator va;
         va = ObjectAnimator.ofInt(findViewById(R.id.linearLayout), "backgroundColor", start, end);
@@ -139,8 +155,9 @@ public class MainActivity extends Activity {
         va.start();
     }
     private String getDate(){
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
+        Log.e(TAG,"getDate() " + dateFormat.format(date));
         return dateFormat.format(date);
     }
     private String getTime(){
@@ -172,9 +189,9 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private long saveTime(String table, String date, String time, String appState){
+    private long saveTime(String table, String date, String time, String appState,int interval){
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
-        return dbHelper.insertTime(table,date,time,appState);
+        return dbHelper.insertTime(table,date,time,appState,interval);
     }
 
     private String getStats(){
@@ -185,10 +202,10 @@ public class MainActivity extends Activity {
     private Cursor getTimeFromSqlite(){
 
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT _id,appstate,date,time FROM ");
+        sqlBuilder.append("SELECT _id,appstate,date,time,interval FROM ");
         sqlBuilder.append(TABLE_NAME);
         sqlBuilder.append(" WHERE date >= date() ");
-        sqlBuilder.append(" ORDER BY time");
+        sqlBuilder.append(" ORDER BY interval,date");
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
@@ -202,10 +219,12 @@ public class MainActivity extends Activity {
      */
     private String buildJodaStats(Cursor cursor){
         ArrayList<DateTime> arrayList = new ArrayList<DateTime>();
+        DateTime[] arrayOfTimes = null;
+        int interval = 0;
         StringBuilder stringBuilder = new StringBuilder();
         DateTime datePart = new DateTime();
         DateTime timePart = new DateTime();
-        DateTimeFormatter formatterDateSqlite = DateTimeFormat.forPattern("yyyy-MM-dd");
+        DateTimeFormatter formatterDateSqlite = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
         DateTimeFormatter formatterTimeSqlite = DateTimeFormat.forPattern("HH:mm:ss");
         DateTimeFormatter simpleHumanDateFormat = DateTimeFormat.forPattern("MMMM d',' yyyy");
         DateTimeFormatter simpleHumanTimeFormat = DateTimeFormat.forPattern("H:mm:ss");
@@ -217,17 +236,39 @@ public class MainActivity extends Activity {
             try{
                 datePart = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
                 timePart = formatterTimeSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("time")));
+                interval = cursor.getInt(cursor.getColumnIndex("interval"));
                 arrayList.add(timePart);
+                Log.e(TAG,datePart +", " + timePart +", " + " ,interval = " +interval);
             }catch (Exception pe){
                 Log.e(TAG,pe.getMessage());
             }
-            stringBuilder.append(datePart.toString(simpleHumanDateFormat));
-            stringBuilder.append(" \n");
-            stringBuilder.append(timePart.toString(simpleHumanTimeFormat));
-            stringBuilder.append(" \n");
-            stringBuilder.append(cursor.getString(cursor.getColumnIndex("appstate")));
-            stringBuilder.append(" \n");
             cursor.moveToNext();
+        }
+
+        arrayOfTimes = arrayList.toArray(new DateTime[arrayList.size()]);
+        Log.e(TAG,"arrayOfTimes.length = " + arrayOfTimes.length);
+        ArrayList<DateTime> stats = new ArrayList<DateTime>();
+
+            for(int d=0;d<arrayOfTimes.length;d++){
+                DateTime startTime = null;
+                DateTime endTime = null;
+
+                if(d%2==0){
+                    endTime = arrayOfTimes[d];
+                }else{
+                    startTime = arrayOfTimes[d];
+                }
+                Log.e(TAG,"startTime " + startTime.toString(simpleHumanTimeFormat));
+                Log.e(TAG,"endTime " + endTime.toString(simpleHumanTimeFormat));
+
+                if(startTime != null && endTime != null){
+                    stats.add(endTime.minusSeconds(startTime.get(DateTimeFieldType.minuteOfHour()))
+                .minusSeconds(startTime.get(DateTimeFieldType.secondOfMinute())));
+                }
+            }
+        for(DateTime dt:stats){
+            stringBuilder.append(dt.toString(simpleHumanTimeFormat));
+            stringBuilder.append("\n");
         }
 
         return stringBuilder.toString();
