@@ -76,7 +76,7 @@ public class MainActivity extends Activity {
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
         linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
         pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
-        interval=1;
+        interval = getLastInterval(getLastIntervalFromSqlite());
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
             @Override
@@ -140,6 +140,20 @@ public class MainActivity extends Activity {
             }
         });
     }
+    @Override
+    protected void onPause(){
+        super.onPause();
+    }
+    @Override
+    protected void onResume(){
+        super.onResume();
+    }
+    @Override
+    protected void onStop(){
+        super.onStop();
+        saveTime(TABLE_NAME,getDate(),getTime(),"stopped",interval);
+        stopWatch.resetClock();
+    }
     private int getInterval(){
         return interval++;
     }
@@ -200,7 +214,6 @@ public class MainActivity extends Activity {
     }
 
     private Cursor getTimeFromSqlite(){
-
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time,interval FROM ");
         sqlBuilder.append(TABLE_NAME);
@@ -210,6 +223,29 @@ public class MainActivity extends Activity {
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
+    }
+
+    private Cursor getLastIntervalFromSqlite(){
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT _id, appstate,date,time,interval FROM ");
+        stringBuilder.append(TABLE_NAME);
+        stringBuilder.append(" WHERE date >= date() ");
+        stringBuilder.append(" ORDER BY date, interval DESC");
+         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
+        databaseHelper.setTableName(TABLE_NAME);
+        return databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+    }
+    private int getLastInterval(Cursor cursor){
+        int lastInterval = 0;
+        cursor.moveToFirst();
+        while (!cursor.isAfterLast()){
+            lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
+            cursor.moveToNext();
+        }
+        if(lastInterval != 0){
+            return lastInterval + 1;
+        }
+        return 0;
     }
 
     /**
