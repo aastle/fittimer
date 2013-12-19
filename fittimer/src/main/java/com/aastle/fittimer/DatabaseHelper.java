@@ -206,13 +206,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onUpgrade(SQLiteDatabase db,int oldVersion, int newVersion){
-/*
+
         switch (oldVersion) {
             case 1:
-                thisDataBase = getReadableDatabase();
                 thisDataBase.execSQL("ALTER TABLE " +
                         TABLE_NAME + " ADD COLUMN " + COL_INTERVAL + " INTEGER NULL");
         }
-*/
     }
 }
