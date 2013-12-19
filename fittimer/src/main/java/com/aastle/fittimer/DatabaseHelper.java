@@ -24,6 +24,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static String DB_NAME = "";
     private static String DB_PATH = "";
     private static String TABLE_NAME = "";
+    private static String NEW_COLUMN = "";
     private SQLiteDatabase thisDataBase;
     private final Context thisContext;
     private StringBuilder sb = null;
@@ -67,6 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
     }
+
     public void createDatabase() throws IOException {
 
             this.getReadableDatabase();
@@ -204,6 +206,11 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
     @Override
     public void onUpgrade(SQLiteDatabase db,int oldVersion, int newVersion){
-
+        switch (oldVersion) {
+            case 1:
+                thisDataBase = getReadableDatabase();
+                thisDataBase.execSQL("ALTER TABLE " +
+                        TABLE_NAME + " ADD COLUMN " + COL_INTERVAL + " INTEGER NULL");
+        }
     }
 }
