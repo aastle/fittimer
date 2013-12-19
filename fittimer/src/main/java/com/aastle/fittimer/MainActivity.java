@@ -54,6 +54,7 @@ public class MainActivity extends Activity {
     LinearLayout linearLayout;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
+    private static final int DATABASE_VERSION = 2;
     private static final String TABLE_NAME = "times";
 
     @Override
@@ -88,8 +89,7 @@ public class MainActivity extends Activity {
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
-
-                    Log.e(TAG,"!stopWatch.running, interval = "+ interval);
+                    Log.e(TAG,"stopWatch.running, interval = "+ interval);
                 } else if (stopWatch.running()) {
                     saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval);
                     stopWatch.pauseClock();
@@ -204,7 +204,7 @@ public class MainActivity extends Activity {
     }
 
     private long saveTime(String table, String date, String time, String appState,int interval){
-        DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
+        DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         return dbHelper.insertTime(table,date,time,appState,interval);
     }
 
@@ -219,7 +219,7 @@ public class MainActivity extends Activity {
         sqlBuilder.append(TABLE_NAME);
         sqlBuilder.append(" WHERE date >= date() ");
         sqlBuilder.append(" ORDER BY interval,date");
-        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
+        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
@@ -231,7 +231,7 @@ public class MainActivity extends Activity {
         stringBuilder.append(TABLE_NAME);
         stringBuilder.append(" WHERE date >= date() ");
         stringBuilder.append(" ORDER BY date, interval DESC");
-         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
+         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
     }
@@ -283,47 +283,6 @@ public class MainActivity extends Activity {
                         .append(dateDiff.toString(DateTimeFormat.forPattern("m"))).append(" minutes, ")
                         .append(dateDiff.toString(DateTimeFormat.forPattern("s"))).append(" seconds");
 
-/*
-        while (!cursor.isAfterLast())
-        {
-            try{
-                datePart = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
-                timePart = formatterTimeSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("time")));
-                interval = cursor.getInt(cursor.getColumnIndex("interval"));
-                arrayList.add(timePart);
-                Log.e(TAG,datePart +", " + timePart +", " + " ,interval = " +interval);
-            }catch (Exception pe){
-                Log.e(TAG,pe.getMessage());
-            }
-            cursor.moveToNext();
-        }
-
-        arrayOfTimes = arrayList.toArray(new DateTime[arrayList.size()]);
-        Log.e(TAG,"arrayOfTimes.length = " + arrayOfTimes.length);
-        ArrayList<DateTime> stats = new ArrayList<DateTime>();
-
-            for(int d=0;d<arrayOfTimes.length;d++){
-                DateTime startTime = null;
-                DateTime endTime = null;
-
-                if(d%2==0){
-                    endTime = arrayOfTimes[d];
-                }else{
-                    startTime = arrayOfTimes[d];
-                }
-                Log.e(TAG,"startTime " + startTime.toString(simpleHumanTimeFormat));
-                Log.e(TAG,"endTime " + endTime.toString(simpleHumanTimeFormat));
-
-                if(startTime != null && endTime != null){
-                    stats.add(endTime.minusSeconds(startTime.get(DateTimeFieldType.minuteOfHour()))
-                .minusSeconds(startTime.get(DateTimeFieldType.secondOfMinute())));
-                }
-            }
-        for(DateTime dt:stats){
-            stringBuilder.append(dt.toString(simpleHumanTimeFormat));
-            stringBuilder.append("\n");
-        }
-*/
 
         return stringBuilder.toString();
     }
