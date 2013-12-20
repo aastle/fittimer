@@ -209,7 +209,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         switch (oldVersion) {
             case 1:
-                thisDataBase.execSQL("ALTER TABLE " +
+                db.execSQL("ALTER TABLE " +
                         TABLE_NAME + " ADD COLUMN " + COL_INTERVAL + " INTEGER NULL");
         }
     }
