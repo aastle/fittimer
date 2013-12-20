@@ -254,6 +254,10 @@ public class MainActivity extends Activity {
      * @return string
      */
     private String buildJodaStats(Cursor cursor){
+        //TODO Get the intervals for today's date.  For each pair of intervals, subtract the smaller date/time from
+        //TODO the larger date/time value.  Store the difference in an array.
+        //TODO Display the array in the times dialog box.
+
         ArrayList<DateTime> arrayList = new ArrayList<DateTime>();
         DateTime[] arrayOfTimes = null;
         int interval = 0;
