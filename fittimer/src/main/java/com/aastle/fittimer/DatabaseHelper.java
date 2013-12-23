@@ -34,7 +34,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String COL_TIME = "time";
     public static final String COL_APPSTATE = "appstate";
     public static final String COL_INTERVAL = "interval";
-
+    public static final String COL_SESSION = "session";
 
     /**
      * constuctor
@@ -143,7 +143,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
      * @param appState
      * @return
      */
-    public long insertTime(String tableName, String date, String time, String appState,int interval) {
+    public long insertTime(String tableName, String date, String time, String appState,int interval, int session) {
         long id;
         thisDataBase = getWritableDatabase();
         //Log.e("SQL","insertTime(), thisDataBase.toString() = "+thisDataBase.toString() + ", tableName = " + tableName);
@@ -152,6 +152,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         initialValues.put(COL_TIME, time);
         initialValues.put(COL_APPSTATE,appState);
         initialValues.put(COL_INTERVAL,interval);
+        initialValues.put(COL_SESSION,session);
         id = thisDataBase.insert(tableName, null, initialValues);
         thisDataBase.close();
         return id;
@@ -211,6 +212,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             case 1:
                 db.execSQL("ALTER TABLE " +
                         TABLE_NAME + " ADD COLUMN " + COL_INTERVAL + " INTEGER NULL");
+                break;
+            case 2:
+                db.execSQL("ALTER TABLE " + TABLE_NAME + " ADD COLUMN " + COL_SESSION + " INTEGER NULL");
+                break;
         }
     }
 }

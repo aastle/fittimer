@@ -50,12 +50,14 @@ public class MainActivity extends Activity {
     boolean throb = true;
     int start;
     int end;
+    private int session;
     private int interval;
     LinearLayout linearLayout;
     private static final String TAG = "SQL";
     private static final String DATABASE_NAME = "trimtimer.s3db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
     private static final String TABLE_NAME = "times";
+    private boolean startOnCreate = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,12 +66,15 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
 
+        startOnCreate = true;
+
         //TODO Delete the following before release!!!!
 /*
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
         int rowsDeleted = dbHelper.DeleteAllRowsFromTable(TABLE_NAME);
         Log.e(TAG,"DELETED n rows, n = " + rowsDeleted);
 */
+        interval = getLastInterval(getLastIntervalFromSqlite());
 
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
@@ -77,21 +82,22 @@ public class MainActivity extends Activity {
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
         linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
         pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
-        interval = getLastInterval(getLastIntervalFromSqlite());
+
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (!stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"running",interval);
+                    saveTime(TABLE_NAME,getDate(),getTime(),"running",interval,session);
+                    startOnCreate = false;
                     stopWatch.startClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
                     Log.e(TAG,"stopWatch.running, interval = "+ interval);
                 } else if (stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval);
+                    saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval, session);
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
@@ -100,9 +106,9 @@ public class MainActivity extends Activity {
                     getInterval();
 
                 }
-
             }
         });
+
         resetButton = (Button) findViewById(R.id.buttonReset);
         resetButton.setOnClickListener(new OnClickListener() {
             @Override
@@ -126,7 +132,6 @@ public class MainActivity extends Activity {
         stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
-
                 if(throb){
                 colorThrobber();
                 }
@@ -151,7 +156,7 @@ public class MainActivity extends Activity {
     @Override
     protected void onStop(){
         super.onStop();
-        saveTime(TABLE_NAME,getDate(),getTime(),"stopped",interval);
+        saveTime(TABLE_NAME,getDate(),getTime(),"stopped",interval, session);
         stopWatch.resetClock();
     }
     private int getInterval(){
@@ -203,9 +208,12 @@ public class MainActivity extends Activity {
         return super.onOptionsItemSelected(item);
     }
 
-    private long saveTime(String table, String date, String time, String appState,int interval){
+    private long saveTime(String table, String date, String time, String appState,int interval, int session){
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
-        return dbHelper.insertTime(table,date,time,appState,interval);
+        if(startOnCreate){
+            appState = "started";
+        }
+        return dbHelper.insertTime(table,date,time,appState,interval, session);
     }
 
     private String getStats(){
@@ -215,7 +223,7 @@ public class MainActivity extends Activity {
 
     private Cursor getTimeFromSqlite(){
         StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("SELECT _id,appstate,date,time,interval FROM ");
+        sqlBuilder.append("SELECT _id,appstate,date,time,interval session FROM ");
         sqlBuilder.append(TABLE_NAME);
         sqlBuilder.append(" WHERE date >= date() ");
         sqlBuilder.append(" ORDER BY interval,date");
@@ -227,10 +235,11 @@ public class MainActivity extends Activity {
 
     private Cursor getLastIntervalFromSqlite(){
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append("SELECT _id, appstate,date,time,interval FROM ");
+        stringBuilder.append("SELECT _id, appstate,date,time,interval,session FROM ");
         stringBuilder.append(TABLE_NAME);
         stringBuilder.append(" WHERE date >= date() ");
-        stringBuilder.append(" ORDER BY date, interval DESC");
+        stringBuilder.append(" AND appstate != 'started' ");
+        stringBuilder.append(" ORDER BY date, session, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
          DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
@@ -238,14 +247,29 @@ public class MainActivity extends Activity {
     private int getLastInterval(Cursor cursor){
         int lastInterval = 0;
         cursor.moveToFirst();
-        while (!cursor.isAfterLast()){
-            lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
-            cursor.moveToNext();
-        }
+        lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
         if(lastInterval != 0){
             return lastInterval + 1;
         }
         return 0;
+    }
+
+    private int getLastSessionSqlite(){
+        int lastSession = -1;
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("SELECT _id, appstate,date,time,interval, session FROM ");
+        stringBuilder.append(TABLE_NAME);
+        stringBuilder.append(" WHERE date >= date() ");
+        stringBuilder.append(" AND appstate != 'started' ");
+        stringBuilder.append(" ORDER BY date, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
+        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
+        databaseHelper.setTableName(TABLE_NAME);
+        Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        if(cursor != null && cursor.getCount() != 0){
+            cursor.moveToFirst();
+            lastSession = cursor.getInt(cursor.getColumnIndex("session"));
+        }
+        return lastSession;
     }
 
     /**
