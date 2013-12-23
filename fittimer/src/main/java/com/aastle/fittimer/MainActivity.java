@@ -68,6 +68,8 @@ public class MainActivity extends Activity {
 
         startOnCreate = true;
 
+        session = 0;
+
         //TODO Delete the following before release!!!!
 /*
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
@@ -75,6 +77,8 @@ public class MainActivity extends Activity {
         Log.e(TAG,"DELETED n rows, n = " + rowsDeleted);
 */
         interval = getLastInterval(getLastIntervalFromSqlite());
+        session = getThisSession(getLastSessionSqlite());
+        Log.e(TAG,"onCreate() session = " + session + " , interval = " + interval);
 
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
@@ -158,9 +162,13 @@ public class MainActivity extends Activity {
         super.onStop();
         saveTime(TABLE_NAME,getDate(),getTime(),"stopped",interval, session);
         stopWatch.resetClock();
+        Log.e(TAG,"trim timer stopped interval = " + interval + ", session = " + session);
     }
     private int getInterval(){
         return interval++;
+    }
+    private int getSession(){
+        return session++;
     }
     private void colorThrobber(){
         ValueAnimator va;
@@ -226,9 +234,10 @@ public class MainActivity extends Activity {
         sqlBuilder.append("SELECT _id,appstate,date,time,interval session FROM ");
         sqlBuilder.append(TABLE_NAME);
         sqlBuilder.append(" WHERE date >= date() ");
+        sqlBuilder.append(" AND session = ");
+        sqlBuilder.append(session);
         sqlBuilder.append(" ORDER BY interval,date");
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
-        //Log.e(TAG,"Sqlite table times.rowCount = "+databaseHelper.getCountOfTableRows(TABLE_NAME));
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
     }
@@ -239,7 +248,7 @@ public class MainActivity extends Activity {
         stringBuilder.append(TABLE_NAME);
         stringBuilder.append(" WHERE date >= date() ");
         stringBuilder.append(" AND appstate != 'started' ");
-        stringBuilder.append(" ORDER BY date, session, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
+        stringBuilder.append(" ORDER BY session, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
          DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
         return databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
@@ -249,27 +258,36 @@ public class MainActivity extends Activity {
         cursor.moveToFirst();
         lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
         if(lastInterval != 0){
-            return lastInterval + 1;
+            return lastInterval++;
         }
         return 0;
     }
 
-    private int getLastSessionSqlite(){
-        int lastSession = -1;
+    private Cursor getLastSessionSqlite(){
+        int lastSession = 0;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval, session FROM ");
         stringBuilder.append(TABLE_NAME);
         stringBuilder.append(" WHERE date >= date() ");
         stringBuilder.append(" AND appstate != 'started' ");
-        stringBuilder.append(" ORDER BY date, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
+        stringBuilder.append(" ORDER BY session DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
         Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        return cursor;
+    }
+    private int getThisSession(Cursor cursor){
+        int lastSession = 0;
+
         if(cursor != null && cursor.getCount() != 0){
             cursor.moveToFirst();
             lastSession = cursor.getInt(cursor.getColumnIndex("session"));
+            Log.e(TAG,"getLastSessionSqlite = " + lastSession);
+            return lastSession++;
         }
+        Log.e(TAG,"getLastSessionSqlite return no rows, lastSession = 0");
         return lastSession;
+
     }
 
     /**
