@@ -68,8 +68,6 @@ public class MainActivity extends Activity {
 
         startOnCreate = true;
 
-        session = 0;
-
         //TODO Delete the following before release!!!!
 /*
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,1);
@@ -99,14 +97,15 @@ public class MainActivity extends Activity {
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
-                    Log.e(TAG,"stopWatch.running, interval = "+ interval);
+                    Log.e(TAG,"stopWatch.running, interval = "+ interval + ", session = " + session);
                 } else if (stopWatch.running()) {
                     saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval, session);
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
                     buttonStopWatch.setBackground(shapePaused);
-                    Log.e(TAG,"stopWatch.paused, interval "+ interval);
+                    Log.e(TAG,"stopWatch.paused, interval "+ interval + ", session = " + session);
+
                     getInterval();
 
                 }
@@ -215,7 +214,12 @@ public class MainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
-
+    @Override
+    public void onBackPressed() {
+        stopWatch.stop();
+        moveTaskToBack(false);
+        super.onBackPressed();
+    }
     private long saveTime(String table, String date, String time, String appState,int interval, int session){
         DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         if(startOnCreate){
@@ -264,7 +268,6 @@ public class MainActivity extends Activity {
     }
 
     private Cursor getLastSessionSqlite(){
-        int lastSession = 0;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval, session FROM ");
         stringBuilder.append(TABLE_NAME);
@@ -283,7 +286,9 @@ public class MainActivity extends Activity {
             cursor.moveToFirst();
             lastSession = cursor.getInt(cursor.getColumnIndex("session"));
             Log.e(TAG,"getLastSessionSqlite = " + lastSession);
-            return lastSession++;
+            lastSession++;
+            Log.e(TAG,"getLastSessionSqlite lastSession++ = " + lastSession);
+            return lastSession;
         }
         Log.e(TAG,"getLastSessionSqlite return no rows, lastSession = 0");
         return lastSession;
