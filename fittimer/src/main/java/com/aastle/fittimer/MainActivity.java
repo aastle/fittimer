@@ -28,9 +28,7 @@ import org.joda.time.DateTimeFieldType;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
-import java.lang.reflect.Array;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -235,6 +233,7 @@ public class MainActivity extends Activity {
     }
 
     private Cursor getTimeFromSqlite(){
+        Cursor cursor;
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time,interval session FROM ");
         sqlBuilder.append(TABLE_NAME);
@@ -244,10 +243,12 @@ public class MainActivity extends Activity {
         sqlBuilder.append(" ORDER BY interval,date");
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
-        return databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
+        cursor = databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
+        return cursor;
     }
 
     private Cursor getLastIntervalFromSqlite(){
+        Cursor cursor;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval,session FROM ");
         stringBuilder.append(TABLE_NAME);
@@ -256,7 +257,8 @@ public class MainActivity extends Activity {
         stringBuilder.append(" ORDER BY session, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
          DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
-        return databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        return cursor;
     }
     private int getLastInterval(Cursor cursor){
         int lastInterval = 0;
@@ -273,6 +275,7 @@ public class MainActivity extends Activity {
     }
 
     private Cursor getLastSessionSqlite(){
+        Cursor cursor;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval, session FROM ");
         stringBuilder.append(TABLE_NAME);
@@ -281,7 +284,7 @@ public class MainActivity extends Activity {
         stringBuilder.append(" ORDER BY session DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
-        Cursor cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
         return cursor;
     }
     private int getThisSession(Cursor cursor){
@@ -302,7 +305,7 @@ public class MainActivity extends Activity {
 
     /**
      * Builds and displays exercise stats using the Jodatime library
-     * @param cursor
+     * @param cursor cursor from Sqlite query
      * @return string
      */
     private String buildJodaStats(Cursor cursor){
@@ -333,18 +336,22 @@ public class MainActivity extends Activity {
         stringBuilder.append("\n\n");
         stringBuilder.append("Total time exercised:\n");
         stringBuilder.append(dateDiff.toString(simpleHumanTimeFormat));
-        stringBuilder.append("\n");
-        stringBuilder
-                .append(dateDiff.toString(DateTimeFormat.forPattern("H"))).append(" hours, ")
-                        .append(dateDiff.toString(DateTimeFormat.forPattern("m"))).append(" minutes, ")
-                        .append(dateDiff.toString(DateTimeFormat.forPattern("s"))).append(" seconds");
-
+        stringBuilder.append("\n\n");
+        if(dateDiff.getHourOfDay() != 0)
+            stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("H"))).append(" hours, ");
+        if(dateDiff.getMinuteOfHour() != 0)
+            stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("m"))).append(" minutes, ");
+        if(dateDiff.getSecondOfMinute() != 0)
+            stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("s"))).append(" seconds");
+        else {
+            stringBuilder.append("0");
+        }
 
         return stringBuilder.toString();
     }
 
     private String buildAboutInfo(){
-        String packageName = "";
+        String packageName;
         String versionName = "";
 
         Long time = System.currentTimeMillis();
