@@ -8,6 +8,7 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.database.CursorIndexOutOfBoundsException;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
@@ -260,7 +261,11 @@ public class MainActivity extends Activity {
     private int getLastInterval(Cursor cursor){
         int lastInterval = 0;
         cursor.moveToFirst();
+        try{
         lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
+        }catch(CursorIndexOutOfBoundsException ce){
+            Log.e(TAG,"GetLastIntervalFromSqlite() CursorIndexOutOfBoundsException" + ce.getMessage());
+        }
         if(lastInterval != 0){
             return lastInterval++;
         }
