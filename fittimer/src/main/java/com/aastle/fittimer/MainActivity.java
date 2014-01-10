@@ -346,6 +346,7 @@ public class MainActivity extends Activity {
         DateTimeFormatter simpleHumanTimeFormat = DateTimeFormat.forPattern("H:mm:ss");
 
         cursor.moveToFirst();
+        //TODO impliment cursor index checking
         DateTime firstDate = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
         cursor.moveToLast();
         DateTime lastDate = formatterDateSqlite.parseDateTime(cursor.getString(cursor.getColumnIndex("date")));
