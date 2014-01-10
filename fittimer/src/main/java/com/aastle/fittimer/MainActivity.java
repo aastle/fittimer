@@ -98,14 +98,14 @@ public class MainActivity extends Activity {
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
-                    Log.e(TAG, "stopWatch.running, interval = " + interval + ", session = " + session);
+                    //Log.e(TAG, "stopWatch.running, interval = " + interval + ", session = " + session);
                 } else if (stopWatch.running()) {
                     saveTime(TABLE_NAME, getDate(), getTime(), "paused", interval, session);
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
                     buttonStopWatch.setBackground(shapePaused);
-                    Log.e(TAG, "stopWatch.paused, interval " + interval + ", session = " + session);
+                    //Log.e(TAG, "stopWatch.paused, interval " + interval + ", session = " + session);
 
                     getInterval();
 
@@ -165,7 +165,7 @@ public class MainActivity extends Activity {
         super.onStop();
         saveTime(TABLE_NAME, getDate(), getTime(), "stopped", interval, session);
         stopWatch.resetClock();
-        Log.e(TAG, "trim timer stopped interval = " + interval + ", session = " + session);
+        //Log.e(TAG, "trim timer stopped interval = " + interval + ", session = " + session);
     }
 
     @Override
@@ -196,7 +196,7 @@ public class MainActivity extends Activity {
     private String getDate() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
-        Log.e(TAG, "getDate() " + dateFormat.format(date));
+        //Log.e(TAG, "getDate() " + dateFormat.format(date));
         return dateFormat.format(date);
     }
 
