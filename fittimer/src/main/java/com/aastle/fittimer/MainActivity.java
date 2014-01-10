@@ -13,12 +13,14 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.Chronometer;
 import android.widget.LinearLayout;
@@ -33,8 +35,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-
-
 
 
 public class MainActivity extends Activity {
@@ -57,11 +57,13 @@ public class MainActivity extends Activity {
     private static final int DATABASE_VERSION = 3;
     private static final String TABLE_NAME = "times";
     private boolean startOnCreate = false;
+    protected PowerManager.WakeLock mWakeLock;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
         throb = checkThrobberPref();
 
@@ -75,14 +77,14 @@ public class MainActivity extends Activity {
 */
         interval = getLastInterval(getLastIntervalFromSqlite());
         session = getThisSession(getLastSessionSqlite());
-        Log.e(TAG,"onCreate() session = " + session + " , interval = " + interval);
+        Log.e(TAG, "onCreate() session = " + session + " , interval = " + interval);
 
         stopWatch = (StopWatch) findViewById(R.id.stopwatch);
         shapePaused = getResources().getDrawable(R.drawable.shape_circle_stop_start_paused);
         shapeStart = getResources().getDrawable(R.drawable.shape_circle_stop_start);
         shapeStats = getResources().getDrawable(R.drawable.shape_stats_circle);
-        linearLayout = (LinearLayout)findViewById(R.id.linearLayout);
-        pulse_start = (TransitionDrawable)getResources().getDrawable(R.drawable.pulse_color_start);
+        linearLayout = (LinearLayout) findViewById(R.id.linearLayout);
+        pulse_start = (TransitionDrawable) getResources().getDrawable(R.drawable.pulse_color_start);
 
         buttonStopWatch = (Button) findViewById(R.id.buttonStartStop);
         buttonStopWatch.setOnClickListener(new OnClickListener() {
@@ -90,20 +92,20 @@ public class MainActivity extends Activity {
             public void onClick(View v) {
 
                 if (!stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"running",interval,session);
+                    saveTime(TABLE_NAME, getDate(), getTime(), "running", interval, session);
                     startOnCreate = false;
                     stopWatch.startClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
-                    Log.e(TAG,"stopWatch.running, interval = "+ interval + ", session = " + session);
+                    Log.e(TAG, "stopWatch.running, interval = " + interval + ", session = " + session);
                 } else if (stopWatch.running()) {
-                    saveTime(TABLE_NAME,getDate(),getTime(),"paused",interval, session);
+                    saveTime(TABLE_NAME, getDate(), getTime(), "paused", interval, session);
                     stopWatch.pauseClock();
                     buttonStopWatch.setText("RESUME");
                     buttonStopWatch.setTextSize(40);
                     buttonStopWatch.setBackground(shapePaused);
-                    Log.e(TAG,"stopWatch.paused, interval "+ interval + ", session = " + session);
+                    Log.e(TAG, "stopWatch.paused, interval " + interval + ", session = " + session);
 
                     getInterval();
 
@@ -115,14 +117,14 @@ public class MainActivity extends Activity {
         resetButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(stopWatch.running()){
+                if (stopWatch.running()) {
                     stopWatch.resetClock();
                     buttonStopWatch.setText("PAUSE");
                     buttonStopWatch.setTextSize(50);
                     buttonStopWatch.setBackground(shapeStart);
                     stopWatch.startClock();
                     //Log.e(TAG,getTimeFromSqlite());
-                }else if(!stopWatch.running()){
+                } else if (!stopWatch.running()) {
                     stopWatch.resetClock();
                     buttonStopWatch.setText("START");
                     buttonStopWatch.setTextSize(50);
@@ -134,12 +136,12 @@ public class MainActivity extends Activity {
         stopWatch.setOnChronometerTickListener(new Chronometer.OnChronometerTickListener() {
             @Override
             public void onChronometerTick(Chronometer chronometer) {
-                if(throb){
-                colorThrobber();
+                if (throb) {
+                    colorThrobber();
                 }
             }
         });
-        statsButton = (Button)findViewById(R.id.buttonStats);
+        statsButton = (Button) findViewById(R.id.buttonStats);
         statsButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -147,28 +149,39 @@ public class MainActivity extends Activity {
             }
         });
     }
+
     @Override
-    protected void onPause(){
+    protected void onPause() {
         super.onPause();
     }
+
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
     }
+
     @Override
-    protected void onStop(){
+    protected void onStop() {
         super.onStop();
-        saveTime(TABLE_NAME,getDate(),getTime(),"stopped",interval, session);
+        saveTime(TABLE_NAME, getDate(), getTime(), "stopped", interval, session);
         stopWatch.resetClock();
-        Log.e(TAG,"trim timer stopped interval = " + interval + ", session = " + session);
+        Log.e(TAG, "trim timer stopped interval = " + interval + ", session = " + session);
     }
-    private int getInterval(){
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    private int getInterval() {
         return interval++;
     }
-    private int getSession(){
+
+    private int getSession() {
         return session++;
     }
-    private void colorThrobber(){
+
+    private void colorThrobber() {
         ValueAnimator va;
         va = ObjectAnimator.ofInt(findViewById(R.id.linearLayout), "backgroundColor", start, end);
         start = Color.WHITE;
@@ -179,17 +192,20 @@ public class MainActivity extends Activity {
         va.setRepeatMode(ValueAnimator.REVERSE);
         va.start();
     }
-    private String getDate(){
+
+    private String getDate() {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date date = new Date();
-        Log.e(TAG,"getDate() " + dateFormat.format(date));
+        Log.e(TAG, "getDate() " + dateFormat.format(date));
         return dateFormat.format(date);
     }
-    private String getTime(){
+
+    private String getTime() {
         DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         Date date = new Date();
         return dateFormat.format(date);
     }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -205,7 +221,7 @@ public class MainActivity extends Activity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch (item.getItemId()) {
             case R.id.action_settings:
-                startActivity(new Intent(this,SettingsActivity.class));
+                startActivity(new Intent(this, SettingsActivity.class));
                 return true;
             case R.id.about:
                 showDialogBox(buildAboutInfo());
@@ -213,26 +229,28 @@ public class MainActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
     @Override
     public void onBackPressed() {
         stopWatch.stop();
         moveTaskToBack(false);
         super.onBackPressed();
     }
-    private long saveTime(String table, String date, String time, String appState,int interval, int session){
-        DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
-        if(startOnCreate){
+
+    private long saveTime(String table, String date, String time, String appState, int interval, int session) {
+        DatabaseHelper dbHelper = new DatabaseHelper(getBaseContext(), DATABASE_NAME, null, DATABASE_VERSION);
+        if (startOnCreate) {
             appState = "started";
         }
-        return dbHelper.insertTime(table,date,time,appState,interval, session);
+        return dbHelper.insertTime(table, date, time, appState, interval, session);
     }
 
-    private String getStats(){
+    private String getStats() {
         Cursor statsCursor = getTimeFromSqlite();
         return buildJodaStats(statsCursor);
     }
 
-    private Cursor getTimeFromSqlite(){
+    private Cursor getTimeFromSqlite() {
         Cursor cursor;
         StringBuilder sqlBuilder = new StringBuilder();
         sqlBuilder.append("SELECT _id,appstate,date,time,interval session FROM ");
@@ -241,13 +259,13 @@ public class MainActivity extends Activity {
         sqlBuilder.append(" AND session = ");
         sqlBuilder.append(session);
         sqlBuilder.append(" ORDER BY interval,date");
-        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
+        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(), DATABASE_NAME, null, DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
         cursor = databaseHelper.getReadableDatabase().rawQuery(sqlBuilder.toString(), null);
         return cursor;
     }
 
-    private Cursor getLastIntervalFromSqlite(){
+    private Cursor getLastIntervalFromSqlite() {
         Cursor cursor;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval,session FROM ");
@@ -255,26 +273,27 @@ public class MainActivity extends Activity {
         stringBuilder.append(" WHERE date >= date() ");
         stringBuilder.append(" AND appstate != 'started' ");
         stringBuilder.append(" ORDER BY session, interval DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
-         DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
+        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(), DATABASE_NAME, null, DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
-        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(), null);
         return cursor;
     }
-    private int getLastInterval(Cursor cursor){
+
+    private int getLastInterval(Cursor cursor) {
         int lastInterval = 0;
         cursor.moveToFirst();
-        try{
-        lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
-        }catch(CursorIndexOutOfBoundsException ce){
-            Log.e(TAG,"GetLastIntervalFromSqlite() CursorIndexOutOfBoundsException" + ce.getMessage());
+        try {
+            lastInterval = cursor.getInt(cursor.getColumnIndex("interval"));
+        } catch (CursorIndexOutOfBoundsException ce) {
+            Log.e(TAG, "GetLastIntervalFromSqlite() CursorIndexOutOfBoundsException" + ce.getMessage());
         }
-        if(lastInterval != 0){
+        if (lastInterval != 0) {
             return lastInterval++;
         }
         return 0;
     }
 
-    private Cursor getLastSessionSqlite(){
+    private Cursor getLastSessionSqlite() {
         Cursor cursor;
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("SELECT _id, appstate,date,time,interval, session FROM ");
@@ -282,33 +301,35 @@ public class MainActivity extends Activity {
         stringBuilder.append(" WHERE date >= date() ");
         stringBuilder.append(" AND appstate != 'started' ");
         stringBuilder.append(" ORDER BY session DESC LIMIT 1"); /* return 1 row, TOP not in Sqlite syntax */
-        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(),DATABASE_NAME,null,DATABASE_VERSION);
+        DatabaseHelper databaseHelper = new DatabaseHelper(getBaseContext(), DATABASE_NAME, null, DATABASE_VERSION);
         databaseHelper.setTableName(TABLE_NAME);
-        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(),null);
+        cursor = databaseHelper.getReadableDatabase().rawQuery(stringBuilder.toString(), null);
         return cursor;
     }
-    private int getThisSession(Cursor cursor){
+
+    private int getThisSession(Cursor cursor) {
         int lastSession = 0;
 
-        if(cursor != null && cursor.getCount() != 0){
+        if (cursor != null && cursor.getCount() != 0) {
             cursor.moveToFirst();
             lastSession = cursor.getInt(cursor.getColumnIndex("session"));
-            Log.e(TAG,"getLastSessionSqlite = " + lastSession);
+            Log.e(TAG, "getLastSessionSqlite = " + lastSession);
             lastSession++;
-            Log.e(TAG,"getLastSessionSqlite lastSession++ = " + lastSession);
+            Log.e(TAG, "getLastSessionSqlite lastSession++ = " + lastSession);
             return lastSession;
         }
-        Log.e(TAG,"getLastSessionSqlite return no rows, lastSession = 0");
+        Log.e(TAG, "getLastSessionSqlite return no rows, lastSession = 0");
         return lastSession;
 
     }
 
     /**
      * Builds and displays exercise stats using the Jodatime library
+     *
      * @param cursor cursor from Sqlite query
      * @return string
      */
-    private String buildJodaStats(Cursor cursor){
+    private String buildJodaStats(Cursor cursor) {
         //TODO Get the intervals for today's date.  For each pair of intervals, subtract the smaller date/time from
         //TODO the larger date/time value.  Store the difference in an array.
         //TODO Display the array in the times dialog box.
@@ -337,11 +358,11 @@ public class MainActivity extends Activity {
         stringBuilder.append("Total time exercised:\n");
         stringBuilder.append(dateDiff.toString(simpleHumanTimeFormat));
         stringBuilder.append("\n\n");
-        if(dateDiff.getHourOfDay() != 0)
+        if (dateDiff.getHourOfDay() != 0)
             stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("H"))).append(" hours, ");
-        if(dateDiff.getMinuteOfHour() != 0)
+        if (dateDiff.getMinuteOfHour() != 0)
             stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("m"))).append(" minutes, ");
-        if(dateDiff.getSecondOfMinute() != 0)
+        if (dateDiff.getSecondOfMinute() != 0)
             stringBuilder.append(dateDiff.toString(DateTimeFormat.forPattern("s"))).append(" seconds");
         else {
             stringBuilder.append("0");
@@ -350,7 +371,7 @@ public class MainActivity extends Activity {
         return stringBuilder.toString();
     }
 
-    private String buildAboutInfo(){
+    private String buildAboutInfo() {
         String packageName;
         String versionName = "";
 
@@ -360,12 +381,12 @@ public class MainActivity extends Activity {
         int year = calendar.get(Calendar.YEAR);
 
         int versionCode = 0;
-        try{
+        try {
             packageName = getPackageName();
             versionCode = getPackageManager().getPackageInfo(packageName, 0).versionCode;
             versionName = getPackageManager().getPackageInfo(packageName, 0).versionName;
-        }catch (Exception e){
-            Log.e(TAG,"Package Name not Found :(");
+        } catch (Exception e) {
+            Log.e(TAG, "Package Name not Found :(");
         }
         StringBuilder stringBuilder = new StringBuilder();
         stringBuilder.append("Trim Timer\n");
@@ -379,15 +400,17 @@ public class MainActivity extends Activity {
         return stringBuilder.toString();
 
     }
-    private boolean checkThrobberPref(){
+
+    private boolean checkThrobberPref() {
         SharedPreferences myPref = PreferenceManager.getDefaultSharedPreferences(
                 getBaseContext());
         return myPref.getBoolean("preference_throb", true);
     }
-    private void showDialogBox(CharSequence about){
+
+    private void showDialogBox(CharSequence about) {
         new AlertDialog.Builder(this)
                 .setMessage(about)
-                .setPositiveButton("OK",null)
+                .setPositiveButton("OK", null)
                 .show();
 
     }
